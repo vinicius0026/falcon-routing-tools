@@ -9,6 +9,7 @@ verify_ssl = true
 pytest = "*"
 falcon = "*"
 marshmallow = "*"
+apispec = "*"
 
 [requires]
 python_version = "3.7"
