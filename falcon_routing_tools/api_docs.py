@@ -58,7 +58,7 @@ class APIDocs():
 
         openApiConverter = OpenAPIConverter(OPEN_API_VERSION, lambda s: None, None)
 
-        requestBody = {}
+        request_body = {}
         response = {}
 
         if payload_schema:
