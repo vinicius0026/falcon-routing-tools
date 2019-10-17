@@ -52,6 +52,7 @@ class APIDocs():
     def _get_operation_spec(handler):
         closure_vars = inspect.getclosurevars(handler)
         description = closure_vars.nonlocals.get('description', '')
+        params_schema = closure_vars.nonlocals.get('params_schema')
         payload_schema = closure_vars.nonlocals.get('payload_schema')
         response_schema = closure_vars.nonlocals.get('response_schema')
         success_response_code = closure_vars.nonlocals.get('success_response_code')
@@ -60,6 +61,13 @@ class APIDocs():
 
         request_body = {}
         response = {}
+        params = {}
+
+        if params_schema:
+            params_schema_dict = openApiConverter.fields2parameters(params_schema._declared_fields, default_in='query')
+            params = dict(
+                parameters=params_schema_dict
+            )
 
         if payload_schema:
             payload_schema_dict = openApiConverter.schema2jsonschema(payload_schema)
@@ -100,5 +108,6 @@ class APIDocs():
             'responses': {
                 **response
             },
-            **request_body
+            **request_body,
+            **params
         }
