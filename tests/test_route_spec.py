@@ -81,7 +81,7 @@ def test_invalid_param(client):
     response = client.simulate_get('/books?page=str')
 
     assert response.status_code == 422
-    assert response.json['description'] == "{'page': ['Not a valid integer.']}"
+    assert response.json['description'] == {'page': ['Not a valid integer.']}
 
 def test_payload_validation(client):
     expected_body = dict(
@@ -98,4 +98,4 @@ def test_invalid_payload(client):
     response = client.simulate_post('/books', json=dict(name='name'))
 
     assert response.status_code == 422
-    assert response.json['description'] == "{'author': ['Missing data for required field.']}"
+    assert response.json['description'] == {'author': ['Missing data for required field.']}
