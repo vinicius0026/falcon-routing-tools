@@ -19,10 +19,21 @@ def test_api_docs():
         book = fields.Nested(BookSchema)
 
 
+    class ListBooksParamsSchema(Schema):
+        page = fields.Int()
+        items_per_page = fields.Int()
+
+    class ListBooksResponseSchema(Schema):
+        books = fields.List(fields.Nested(BookSchema))
+
     @router.resource('/books')
     class Books():
         @route_spec(description='Create Book endpoint', payload_schema=BookSchema, response_schema=BookResponseSchema, success_response_code=201)
         def on_post(self, req, resp, **kwargs):
+            resp.media = dict()
+
+        @route_spec(description='List Books endpoint', params_schema=ListBooksParamsSchema, response_schema=ListBooksResponseSchema)
+        def on_get(self, req, resp, **kwargs):
             resp.media = dict()
 
 
@@ -89,6 +100,55 @@ def test_api_docs():
                                     }
                                 }
                             }
+                        }
+                    }
+                },
+                'get': {
+                    'description': 'List Books endpoint',
+                    'parameters': [
+                        {
+                            'in': 'query',
+                            'name': 'page',
+                            'required': False,
+                            'schema': {
+                                'format': 'int32',
+                                'type': 'integer'
+                            }
+                        },
+                        {
+                            'in': 'query',
+                            'name': 'items_per_page',
+                            'required': False,
+                            'schema': {
+                                'format': 'int32',
+                                'type': 'integer'
+                            }
+                        }
+                    ],
+                    'responses': {
+                        '200': {
+                            'content': {
+                                'application/json': {
+                                    'schema': {
+                                        'properties': {
+                                            'books': {
+                                                'items': {
+                                                    'properties': {
+                                                        'author': {'type': 'string'},
+                                                        'publishedYear': {'format': 'int32', 'type': 'integer'},
+                                                        'title': {'type': 'string'},
+                                                    },
+                                                    'required': ['title'],
+                                                    'type': 'object'
+                                                },
+                                                'type': 'array'
+                                            }
+                                        },
+                                        'type': 'object'
+                                    }
+                                }
+                            },
+                            'description': 'success'
                         }
                     }
                 }
