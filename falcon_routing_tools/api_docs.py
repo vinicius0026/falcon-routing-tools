@@ -1,5 +1,6 @@
 import inspect
 from apispec.ext.marshmallow.openapi import OpenAPIConverter
+import re
 
 OPEN_API_VERSION = '3.0.2'
 
@@ -19,15 +20,15 @@ class APIDocs():
                 version=version
             ),
             paths={
-                route.path: APIDocs._get_resource_spec(route.resource)
+                route.path: APIDocs._get_resource_spec(route.resource, route.path)
                 for route in routes
             }
         )
 
     @staticmethod
-    def _get_resource_spec(resource):
+    def _get_resource_spec(resource, path):
         return {
-            operation.verb: APIDocs._get_operation_spec(operation.handler)
+            operation.verb: APIDocs._get_operation_spec(operation.handler, path)
             for operation in APIDocs._get_operations_from_resource(resource)
         }
 
@@ -49,7 +50,7 @@ class APIDocs():
 
 
     @staticmethod
-    def _get_operation_spec(handler):
+    def _get_operation_spec(handler, path):
         closure_vars = inspect.getclosurevars(handler)
         description = closure_vars.nonlocals.get('description', '')
         params_schema = closure_vars.nonlocals.get('params_schema')
@@ -62,6 +63,15 @@ class APIDocs():
         request_body = {}
         response = {}
         params = {}
+        path_tag_blocks = map(
+            lambda block: block.capitalize(),
+            (
+                re.sub(r'^/(v\d/)?', '', path)
+                    .split('/')
+                    .pop(0)
+                    .split('_')
+            )
+        )
 
         if params_schema:
             params_schema_dict = openApiConverter.fields2parameters(params_schema._declared_fields, default_in='query')
@@ -108,6 +118,7 @@ class APIDocs():
             'responses': {
                 **response
             },
+            'tags': [ ' '.join(path_tag_blocks) ],
             **request_body,
-            **params
+            **params,
         }
