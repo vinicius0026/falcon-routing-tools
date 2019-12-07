@@ -4,17 +4,19 @@ import re
 import pkgutil
 
 class Route():
-    def __init__(self, path, resource):
+    def __init__(self, path, resource, prefix):
         self.path = path
         self.resource = resource
+        self.prefix = prefix
 
 class Router():
-    def __init__(self):
+    def __init__(self, prefix=''):
         self.resources = []
+        self.prefix = prefix
 
     def resource(self, path):
         def decorator(Resource):
-            route = Route(path, Resource)
+            route = Route(path, Resource, self.prefix)
             self.resources.append(route)
 
             @functools.wraps(Resource)

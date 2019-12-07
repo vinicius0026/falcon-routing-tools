@@ -19,16 +19,28 @@ class APIDocs():
                 title=title,
                 version=version
             ),
+            components=dict(
+                securitySchemes=dict(
+                    bearerAuth=dict(
+                        type='http',
+                        scheme='bearer',
+                        bearerFormat='JWT',
+                    )
+                )
+            ),
+            security=[
+                dict(bearerAuth=[])
+            ],
             paths={
-                route.path: APIDocs._get_resource_spec(route.resource, route.path)
+                route.path: APIDocs._get_resource_spec(route.resource, route)
                 for route in routes
             }
         )
 
     @staticmethod
-    def _get_resource_spec(resource, path):
+    def _get_resource_spec(resource, route):
         return {
-            operation.verb: APIDocs._get_operation_spec(operation.handler, path)
+            operation.verb: APIDocs._get_operation_spec(resource, operation.handler, route)
             for operation in APIDocs._get_operations_from_resource(resource)
         }
 
@@ -50,7 +62,7 @@ class APIDocs():
 
 
     @staticmethod
-    def _get_operation_spec(handler, path):
+    def _get_operation_spec(resource, handler, route):
         closure_vars = inspect.getclosurevars(handler)
         description = closure_vars.nonlocals.get('description', '')
         params_schema = closure_vars.nonlocals.get('params_schema')
@@ -63,15 +75,21 @@ class APIDocs():
         request_body = {}
         response = {}
         params = {}
-        path_tag_blocks = map(
-            lambda block: block.capitalize(),
-            (
-                re.sub(r'^/(v\d/)?', '', path)
-                    .split('/')
-                    .pop(0)
-                    .split('_')
+
+        if getattr(resource, 'tags', False):
+            tags = resource.tags
+        else:
+            path_tag_blocks = map(
+                lambda block: block.capitalize(),
+                (
+                    re.sub(r'^/(v\d/)?', '', route.path)
+                        .split('/')
+                        .pop(0)
+                        .split('_')
+                )
             )
-        )
+
+            tags = ' '.join(path_tag_blocks)
 
         if params_schema:
             params_schema_dict = openApiConverter.fields2parameters(params_schema._declared_fields, default_in='query')
@@ -112,13 +130,18 @@ class APIDocs():
             }
 
 
-
-        return {
+        operation_spec = {
             'description': description,
             'responses': {
                 **response
             },
-            'tags': [ ' '.join(path_tag_blocks) ],
+            'servers': [ dict(url=route.prefix) ],
+            'tags': [ tags ],
             **request_body,
             **params,
         }
+
+        if getattr(resource, 'no_auth', False):
+            operation_spec['security'] = []
+
+        return operation_spec
