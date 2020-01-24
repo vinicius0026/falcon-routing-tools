@@ -49,6 +49,9 @@ def test_api_docs():
             '/books': {
                 'post': {
                     'description': 'Create Book endpoint',
+                    'servers': [],
+                    'parameters': [],
+                    'tags': ['Books'],
                     'requestBody': {
                         'description': 'BookSchema',
                         'content': {
@@ -105,6 +108,7 @@ def test_api_docs():
                 },
                 'get': {
                     'description': 'List Books endpoint',
+                    'servers': [],
                     'parameters': [
                         {
                             'in': 'query',
@@ -125,6 +129,7 @@ def test_api_docs():
                             }
                         }
                     ],
+                    'tags': ['Books'],
                     'responses': {
                         '200': {
                             'content': {

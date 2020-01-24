@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
 	name="falcon-routing-tools",
-	version="0.3.0",
+	version="0.4.0",
 	description="Routing helpers for falcon",
 	url="https://github.com/ServiceF/falcon-routing-tools",
 	license="MIT",
