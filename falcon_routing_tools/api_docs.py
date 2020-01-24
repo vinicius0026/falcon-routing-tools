@@ -64,6 +64,7 @@ class APIDocs():
         request_body = {}
         response = {}
         parameters = []
+        servers = []
 
         if getattr(resource, 'tags', False):
             tags = resource.tags
@@ -114,6 +115,8 @@ class APIDocs():
                 f'{success_response_code}': ''
             }
 
+        if route.prefix:
+            servers.append(dict(url=route.prefix))
 
         operation_spec = {
             'description': description,
@@ -121,7 +124,7 @@ class APIDocs():
             'responses': {
                 **response
             },
-            'servers': [ dict(url=route.prefix) ],
+            'servers': servers,
             'tags': [ tags ],
             **request_body,
         }
