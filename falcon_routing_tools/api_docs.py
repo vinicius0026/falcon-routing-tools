@@ -22,7 +22,7 @@ class APIDocs():
             paths={
                 route.path: APIDocs._get_resource_spec(route.resource, route)
                 for route in routes
-            }
+            },
             **options,
         )
 
