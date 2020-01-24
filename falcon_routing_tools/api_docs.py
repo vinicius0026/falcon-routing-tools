@@ -12,29 +12,18 @@ class Operation():
 
 class APIDocs():
     @staticmethod
-    def generate(routes, title='', version=''):
+    def generate(routes, title='', version='', options={}):
         return dict(
             openapi=OPEN_API_VERSION,
             info=dict(
                 title=title,
                 version=version
             ),
-            components=dict(
-                securitySchemes=dict(
-                    bearerAuth=dict(
-                        type='http',
-                        scheme='bearer',
-                        bearerFormat='JWT',
-                    )
-                )
-            ),
-            security=[
-                dict(bearerAuth=[])
-            ],
             paths={
                 route.path: APIDocs._get_resource_spec(route.resource, route)
                 for route in routes
             }
+            **options,
         )
 
     @staticmethod
