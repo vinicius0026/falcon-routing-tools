@@ -29,7 +29,7 @@ class APIDocs():
     @staticmethod
     def _get_resource_spec(route):
         return {
-            operation.verb: APIDocs._get_operation_spec(route.resource, operation.handler, route)
+            operation.verb: APIDocs._get_operation_spec(operation.handler, route)
             for operation in APIDocs._get_operations_from_resource(route.resource)
         }
 
@@ -51,7 +51,7 @@ class APIDocs():
 
 
     @staticmethod
-    def _get_operation_spec(resource, handler, route):
+    def _get_operation_spec(handler, route):
         closure_vars = inspect.getclosurevars(handler)
         description = closure_vars.nonlocals.get('description', '')
         params_schema = closure_vars.nonlocals.get('params_schema')
@@ -60,6 +60,8 @@ class APIDocs():
         success_response_code = closure_vars.nonlocals.get('success_response_code')
 
         openApiConverter = OpenAPIConverter(OPEN_API_VERSION, lambda s: None, None)
+
+        resource = route.resource
 
         request_body = {}
         response = {}
